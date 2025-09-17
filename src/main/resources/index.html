@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Card Game Scorekeeper</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #111827;
+            --panel-2: #0b1220;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --accent: #22c55e;
+            --danger: #ef4444;
+            --warn: #f59e0b;
+            --primary: #3b82f6;
+            --border: #1f2937;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+            background: linear-gradient(180deg, var(--panel-2), var(--bg));
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 24px 16px 48px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .round-badge {
+            font-size: 13px;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #0b1220aa;
+        }
+
+        .panel {
+            background: linear-gradient(180deg, #0b1220cc, #0b1220aa);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .section-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .leaderboard table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .leaderboard th,
+        .leaderboard td {
+            padding: 10px 8px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .leaderboard th {
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .score-pos {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .score-neg {
+            color: var(--danger);
+            font-weight: 700;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button,
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 14px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        button.secondary {
+            background: #374151;
+        }
+
+        button.warn {
+            background: var(--warn);
+            color: black;
+        }
+
+        button.danger {
+            background: var(--danger);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .round-form {
+            display: grid;
+            grid-template-columns: 1fr 180px 150px;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .round-form .hdr {
+            color: var(--muted);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .player-name {
+            font-weight: 600;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #0b1220;
+            color: var(--text);
+        }
+
+        .checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        @media (min-width: 900px) {
+            .grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hint {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        dialog::backdrop {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        dialog {
+            border: 1px solid var(--border);
+            background: #0b1220;
+            color: var(--text);
+            border-radius: 12px;
+            padding: 16px;
+            max-width: 520px;
+            width: calc(100% - 24px);
+        }
+
+        .names-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .names-grid input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #0b1220;
+            color: var(--text);
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 8px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .pill {
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .pill.neg {
+            color: var(--danger);
+            border-color: #7f1d1d;
+        }
+
+        .pill.pos {
+            color: var(--accent);
+            border-color: #064e3b;
+        }
+
+        .footer-note {
+            margin-top: 14px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .flag {
+            color: var(--danger);
+            font-weight: 700;
+        }
+
+        /* Leader/Loser animations */
+        .leaderboard tr.leader {
+            position: relative;
+            animation: leaderPulse 1.8s ease-in-out infinite;
+        }
+
+        .leaderboard tr.leader .player-name::after {
+            content: " 👑";
+        }
+
+        .leaderboard tr.loser {
+            animation: loserShake 2.2s ease-in-out infinite;
+        }
+
+        @keyframes leaderPulse {
+            0% {
+                box-shadow: 0 0 0 rgba(34, 197, 94, 0.0);
+            }
+
+            50% {
+                box-shadow: 0 0 16px rgba(34, 197, 94, 0.35);
+            }
+
+            100% {
+                box-shadow: 0 0 0 rgba(34, 197, 94, 0.0);
+            }
+        }
+
+        @keyframes loserShake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-2px);
+            }
+
+            50% {
+                transform: translateX(2px);
+            }
+
+            75% {
+                transform: translateX(-1px);
+            }
+        }
+
+        /* Winner overlay */
+        #winOverlay {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            background: radial-gradient(ellipse at center, rgba(11, 18, 32, 0.95), rgba(11, 18, 32, 0.98));
+        }
+
+        #winOverlay.show {
+            display: flex;
+        }
+
+        #winOverlay canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #winOverlay .win-content {
+            position: relative;
+            text-align: center;
+            padding: 24px;
+            border-radius: 16px;
+            background: rgba(17, 24, 39, 0.35);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+        }
+
+        #winOverlay .win-title {
+            font-size: 42px;
+            font-weight: 800;
+            margin: 0 0 6px;
+        }
+
+        #winOverlay .win-sub {
+            font-size: 18px;
+            color: var(--muted);
+            margin: 0 0 14px;
+        }
+
+        #winOverlay .win-name {
+            font-size: 64px;
+            font-weight: 900;
+            color: var(--accent);
+            text-shadow: 0 4px 18px rgba(34, 197, 94, 0.45);
+        }
+
+        #winOverlay .win-actions {
+            margin-top: 18px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <header>
+        <div class="title">Card Game Scorekeeper</div>
+        <div class="round-badge" id="roundBadge">Round 0 / 13</div>
+    </header>
+
+    <div class="grid">
+        <div class="panel">
+            <div class="section-title">Leaderboard</div>
+            <div class="leaderboard" id="leaderboard"></div>
+            <div class="controls" style="margin-top: 12px">
+                <button id="btnStartRound">Start Round</button>
+                <button id="btnEditLastRound" class="secondary">Edit Last Round</button>
+                <button class="secondary" id="btnViewHistory">View History</button>
+                <button id="btnViewAllGames">Leader Board</button>
+                <button class="warn" id="btnEditNames">Edit Player Names</button>
+                <button class="danger" id="btnReset">Reset Game</button>
+            </div>
+            <div class="footer-note">Tip: You can view history at any time during the game.</div>
+        </div>
+
+        <div class="panel" id="roundPanel" style="display:none;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px; margin-bottom: 6px;">
+                <div class="section-title">Enter Committed Scores</div>
+                <div class="hint">Scoring: committed × 10 if committed > 0; if committed is 0 then +10 (if not
+                    failed)
+                    or -10 (if failed). A red flag appears if the total committed equals (14 - round).
+                </div>
+            </div>
+            <div class="round-form" id="roundForm">
+                <div class="hdr">Player</div>
+                <div class="hdr">Committed Score</div>
+                <div class="hdr">Failed?</div>
+                <!-- dynamic rows here -->
+            </div>
+            <div id="sumWarning" class="flag" style="display:none; margin-top:8px;">⚑ Red flag: Total committed
+                equals
+                (14 - round). Consider adjusting.
+            </div>
+            <div class="controls" style="margin-top: 12px;">
+                <button id="btnEndRound">End Round</button>
+                <button class="secondary" id="btnCancelRound">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Winner Celebration Overlay -->
+<div id="winOverlay" aria-hidden="true">
+    <canvas id="fwCanvas"></canvas>
+    <div class="win-content">
+        <div class="win-title">Game Over</div>
+        <div class="win-sub">Winner</div>
+        <div class="win-name" id="winName">Player</div>
+        <div class="win-actions">
+            <button id="btnCloseWin" class="secondary">Close</button>
+            <button id="btnReset2" class="danger">Reset Game</button>
+        </div>
+        <div class="hint" style="margin-top:8px;">Tip: You can reset the game to play again.</div>
+    </div>
+</div>
+
+<dialog id="namesDialog">
+    <form method="dialog" id="namesForm" onsubmit="return false;">
+        <h3 style="margin-top:0">Enter Player Names</h3>
+        <div class="names-grid">
+            <input type="text" id="name0" placeholder="Player 1" required />
+            <input type="text" id="name1" placeholder="Player 2" required />
+            <input type="text" id="name2" placeholder="Player 3" required />
+            <input type="text" id="name3" placeholder="Player 4" required />
+        </div>
+        <div class="controls" style="margin-top:12px;">
+            <button id="btnSaveNames">Save</button>
+            <button class="secondary" id="btnCancelNames">Cancel</button>
+        </div>
+        <div class="hint" style="margin-top:6px;">Exactly four players are required.</div>
+    </form>
+</dialog>
+
+<dialog id="historyDialog">
+    <h3 style="margin-top:0">Game History</h3>
+    <div id="historyContent"></div>
+    <div class="controls" style="margin-top: 12px;">
+        <button id="btnCloseHistory">Close</button>
+    </div>
+</dialog>
+<dialog id="allGamesDialog">
+    <h3 style="margin-top:0">All Played Games</h3>
+    <div id="allGamesContent"></div>
+    <div class="controls" style="margin-top: 12px;">
+        <button id="btnCloseAllGames">Close</button>
+    </div>
+</dialog>
+<script>
+    const MAX_ROUNDS = 13;
+    const STORAGE_KEY = 'cardGameState_v3';
+    const API_BASE_URL = 'https://jxmpeiwz6l.execute-api.ap-south-1.amazonaws.com/dev/games';
+    /**
+     * State shape:
+     * {
+     *   players: [name0, name1, name2, name3],
+     *   totals: [0,0,0,0],
+     *   round: 0, // completed rounds
+     *   history: [
+     *     { round: 1, entries: [ {committed: n, negative: true/false, delta: +/−n*10}, ... ] }
+     *   ]
+     * }
+     */
+    async function saveGameToS3(gameData) {
+        try {
+            const res = await fetch(`${API_BASE_URL}/saveGame`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(gameData)
+            });
+            if (!res.ok) throw new Error('Failed to save');
+            console.log('Game saved to S3');
+        } catch (err) {
+            console.error('Error saving game:', err);
+            alert('Could not save game to S3');
+        }
+    }
+
+    async function loadAllGamesFromS3() {
+        try {
+            const res = await fetch(`${API_BASE_URL}/getGames`);
+            if (!res.ok) throw new Error('Failed to fetch');
+            return await res.json();
+        } catch (err) {
+            console.error(err);
+            alert('Could not fetch games from S3');
+            return [];
+        }
+    }
+    function loadState() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return null;
+            const obj = JSON.parse(raw);
+            if (!obj || !Array.isArray(obj.players) || obj.players.length !== 4) return null;
+            return obj;
+        } catch (e) {
+            console.warn('Failed to load state:', e);
+            return null;
+        }
+    }
+
+    function saveState(state) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function newGame(defaultNames = []) {
+        const players = Array.isArray(defaultNames) && defaultNames.length === 4
+            ? defaultNames.slice(0, 4)
+            : ['', '', '', ''];
+        return {
+            players,
+            totals: [0, 0, 0, 0],
+            round: 0,
+            history: []
+        };
+    }
+
+    let state = loadState() || newGame();
+
+    // UI Elements
+    const leaderboardDiv = document.getElementById('leaderboard');
+    const roundBadge = document.getElementById('roundBadge');
+    const btnStartRound = document.getElementById('btnStartRound');
+    const btnViewHistory = document.getElementById('btnViewHistory');
+    const btnReset = document.getElementById('btnReset');
+    const btnEditNames = document.getElementById('btnEditNames');
+    const btnEditLastRound = document.getElementById('btnEditLastRound');
+
+    const roundPanel = document.getElementById('roundPanel');
+    const roundForm = document.getElementById('roundForm');
+    const btnEndRound = document.getElementById('btnEndRound');
+    const btnCancelRound = document.getElementById('btnCancelRound');
+
+    const namesDialog = document.getElementById('namesDialog');
+    const namesForm = document.getElementById('namesForm');
+    const btnSaveNames = document.getElementById('btnSaveNames');
+    const btnCancelNames = document.getElementById('btnCancelNames');
+
+    const historyDialog = document.getElementById('historyDialog');
+    const historyContent = document.getElementById('historyContent');
+    const btnCloseHistory = document.getElementById('btnCloseHistory');
+
+    // Winner overlay elements
+    const winOverlay = document.getElementById('winOverlay');
+    const winNameEl = document.getElementById('winName');
+    const btnCloseWin = document.getElementById('btnCloseWin');
+    const btnReset2 = document.getElementById('btnReset2');
+    const fwCanvas = document.getElementById('fwCanvas');
+
+    function renderLeaderboard() {
+        roundBadge.textContent = `Round ${state.round} / ${MAX_ROUNDS}`;
+
+        const totals = state.totals.map(v => v || 0);
+        const maxScore = Math.max(...totals);
+        const minScore = Math.min(...totals);
+
+        const tieAll = maxScore === minScore;
+        const rows = state.players.map((name, i) => {
+            const score = totals[i];
+            const scoreCls = score < 0 ? 'score-neg' : 'score-pos';
+            const trCls = tieAll ? '' : [
+                (score === maxScore) ? 'leader' : '',
+                (score === minScore) ? 'loser' : ''
+            ].filter(Boolean).join(' ');
+            return `<tr class="${trCls}">
+                      <td class="player-name">${escapeHtml(name)}</td>
+                      <td class="${scoreCls}">${score}</td>
+                    </tr>`;
+        }).join('');
+
+        leaderboardDiv.innerHTML = `<table>
+                    <thead><tr><th>Player</th><th>Total</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                  </table>`;
+
+        const formOpen = roundPanel.style.display !== 'none';
+        btnStartRound.disabled = formOpen || state.round >= MAX_ROUNDS;
+        if (btnEditLastRound) {
+            btnEditLastRound.disabled = formOpen || state.round === 0;
+        }
+    }
+
+    function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;' }[s]));
+    }
+
+    function openNamesDialog(preset = state.players) {
+        for (let i = 0; i < 4; i++) {
+            const inp = document.getElementById('name' + i);
+            inp.value = preset[i] || '';
+        }
+        namesDialog.showModal();
+    }
+
+    function closeNamesDialog() { namesDialog.close(); }
+
+    let editMode = false;
+    let currentFormRoundNumber = null; // Which round number the current form represents
+
+    function openRound(mode = 'add', presetEntries = null, roundNumber = null) {
+        editMode = mode === 'edit';
+        currentFormRoundNumber = roundNumber != null ? roundNumber : (state.round + 1);
+
+        // Build rows for the 4 players
+        const rows = [];
+        rows.push(`<div class="hdr">Player</div><div class="hdr">Committed Score</div><div class="hdr">Failed?</div>`);
+        state.players.forEach((name, i) => {
+            const committedVal = presetEntries ? (presetEntries[i]?.committed ?? '') : '';
+            const negChecked = presetEntries ? !!(presetEntries[i]?.negative) : false;
+            rows.push(`
+                      <div class="player-name">${escapeHtml(name)}</div>
+                      <div><input type="number" id="commit_${i}" min="0" step="1" placeholder="0" value="${committedVal}" /></div>
+                      <div class="checkbox"><input type="checkbox" id="neg_${i}" ${negChecked ? 'checked' : ''}/> <label for="neg_${i}">Apply negative</label></div>
+                    `);
+        });
+        roundForm.innerHTML = rows.join('');
+
+        // Hook up sum warning updates
+        for (let i = 0; i < 4; i++) {
+            const inp = document.getElementById('commit_' + i);
+            if (inp) inp.addEventListener('input', updateRoundSumWarning);
+        }
+        updateRoundSumWarning();
+
+        roundPanel.style.display = '';
+        btnStartRound.disabled = true;
+        if (btnEditLastRound) btnEditLastRound.disabled = true;
+
+        // Update button label according to mode
+        if (btnEndRound) btnEndRound.textContent = editMode ? 'Save Changes' : 'End Round';
+    }
+
+    function startRound() {
+        openRound('add', null, state.round + 1);
+    }
+
+    function cancelRound() {
+        roundPanel.style.display = 'none';
+        btnStartRound.disabled = state.round >= MAX_ROUNDS;
+        if (btnEditLastRound) btnEditLastRound.disabled = state.round === 0;
+        editMode = false;
+        currentFormRoundNumber = null;
+        if (btnEndRound) btnEndRound.textContent = 'End Round';
+    }
+
+    function updateRoundSumWarning() {
+        let sum = 0;
+        for (let i = 0; i < 4; i++) {
+            const inp = document.getElementById('commit_' + i);
+            const v = (inp && inp.value !== '') ? parseInt(inp.value, 10) : 0;
+            if (!isNaN(v)) sum += Math.max(0, v);
+        }
+        const formRound = currentFormRoundNumber != null ? currentFormRoundNumber : (state.round + 1);
+        const target = 14 - formRound;
+        const warnEl = document.getElementById('sumWarning');
+        if (!warnEl) return;
+        if (sum === target) {
+            warnEl.style.display = '';
+            warnEl.textContent = `⚑ Red flag: Total committed equals (14 - round) = ${target}.`;
+        } else {
+            warnEl.style.display = 'none';
+        }
+    }
+
+    function endRound() {
+        // If adding a new round, ensure we still have capacity
+        if (!editMode && state.round >= MAX_ROUNDS) {
+            alert('All rounds completed. Reset to start a new game.');
+            return;
+        }
+
+        const entries = [];
+        let negativesCount = 0;
+        for (let i = 0; i < 4; i++) {
+            const inp = document.getElementById('commit_' + i);
+            const chk = document.getElementById('neg_' + i);
+            const valRaw = (inp && inp.value !== '') ? inp.value : '0';
+            const committed = parseInt(valRaw, 10);
+            if (isNaN(committed) || committed < 0) {
+                alert('Please enter a non-negative whole number for ' + state.players[i] + '.');
+                return;
+            }
+            const negative = !!(chk && chk.checked);
+            if (negative) negativesCount++;
+            const delta = committed === 0 ? (negative ? -10 : 10) : (negative ? -1 : 1) * committed * 10;
+            entries.push({ committed, negative, delta });
+        }
+
+        // Enforce at least one negative per round
+        if (negativesCount < 1) {
+            alert('At least one player must be marked Failed for this round.');
+            return;
+        }
+
+        // Determine the round number represented by this form
+        const formRound = currentFormRoundNumber != null ? currentFormRoundNumber : (state.round + 1);
+        const target = 14 - formRound;
+        const sumCommitted = entries.reduce((acc, e) => acc + e.committed, 0);
+        const redFlag = sumCommitted === target;
+
+        if (editMode) {
+            // Only last round can be edited
+            if (!state.history.length) {
+                alert('No round to edit.');
+                return;
+            }
+            const lastIndex = state.history.length - 1;
+            const last = state.history[lastIndex];
+            if (last.round !== formRound) {
+                alert('Only the last round can be edited.');
+                return;
+            }
+            // Revert previous deltas
+            last.entries.forEach((e, i) => {
+                state.totals[i] = (state.totals[i] || 0) - e.delta;
+            });
+            // Apply new deltas
+            entries.forEach((e, i) => {
+                state.totals[i] = (state.totals[i] || 0) + e.delta;
+            });
+            // Replace history entry
+            state.history[lastIndex] = { round: formRound, entries, sumCommitted, target, redFlag };
+            // Do not change state.round during edit
+        } else {
+            // Apply new round
+            entries.forEach((e, i) => {
+                state.totals[i] = (state.totals[i] || 0) + e.delta;
+            });
+            state.history.push({ round: formRound, entries, sumCommitted, target, redFlag });
+            state.round += 1;
+        }
+
+        saveState(state);
+
+        renderLeaderboard();
+        roundPanel.style.display = 'none';
+        const formOpen = false;
+        btnStartRound.disabled = state.round >= MAX_ROUNDS || formOpen;
+        if (btnEditLastRound) btnEditLastRound.disabled = state.round === 0 || formOpen;
+        editMode = false;
+        currentFormRoundNumber = null;
+        if (btnEndRound) btnEndRound.textContent = 'End Round';
+
+        if (state.round >= MAX_ROUNDS) {
+            // Show winner overlay with celebration
+            const totals = state.totals.map(v => v || 0);
+            const maxScore = Math.max(...totals);
+            const winners = state.players.filter((_, i) => totals[i] === maxScore);
+            showWinnerOverlay(winners);
+
+            // Save the entire game state to S3
+            saveGameToS3(state);
+        }
+    }
+
+
+
+    const allGamesDialog = document.getElementById('allGamesDialog');
+    const allGamesContent = document.getElementById('allGamesContent');
+    const btnViewAllGames = document.getElementById('btnViewAllGames');
+    const btnCloseAllGames = document.getElementById('btnCloseAllGames');
+
+    btnViewAllGames.addEventListener('click', async () => {
+        allGamesContent.innerHTML = '<div class="muted">Loading...</div>';
+        const games = await loadAllGamesFromS3();
+        if (!games.length) {
+            allGamesContent.innerHTML = '<div class="muted">No games found.</div>';
+        } else {
+            const leaderboard = buildLeaderboard(games);
+            allGamesContent.innerHTML = `
+              <h3>Leaderboard</h3>
+              <table class="leaderboard" border="1" cellpadding="5" style="border-collapse: collapse;">
+                <thead>
+                  <tr>
+    <th>Player</th>
+    <th>Wins</th>
+    <th>Games Played</th>
+    <th>Highest</th>
+    <th>Lowest</th>
+    <th>Total Score</th>
+  </tr>
+                </thead>
+                <tbody>
+  ${leaderboard.map(entry => `
+    <tr>
+      <td class="player-name">${entry.playerName}</td>
+      <td class="score-pos">${entry.totalWins}</td>
+      <td>${entry.noOfGamesPlayed}</td>
+      <td>${entry.highestScore}</td>
+      <td>${entry.lowestScore}</td>
+      <td>${entry.totalScore}</td>
+    </tr>
+  `).join('')}
+</tbody>
+              </table>
+            `;
+        }
+
+        allGamesDialog.showModal();
+    });
+
+    btnCloseAllGames.addEventListener('click', () => allGamesDialog.close());
+    function buildLeaderboard(games) {
+        const sortedLeaderboard = games
+            .sort((a, b) => b.totalWins - a.totalWins);
+
+        return sortedLeaderboard;
+    }
+    function renderHistory() {
+        if (!state.history.length) {
+            historyContent.innerHTML = '<div class="muted">No rounds played yet.</div>';
+            return;
+        }
+        const header = `<tr>
+                    <th>Round</th>
+                    ${state.players.map(p => `<th>${escapeHtml(p)}</th>`).join('')}
+                  </tr>`;
+        const body = state.history.map(h => {
+            const cols = h.entries.map((e, i) => {
+                const pillClass = e.negative ? 'neg' : 'pos';
+                return `<td>
+                        <div>Committed: ${e.committed}</div>
+                        <div class="pill ${pillClass}">${e.delta >= 0 ? '+' : ''}${e.delta}</div>
+                      </td>`;
+            }).join('');
+            return `<tr>
+                      <td>#${h.round} ${h.redFlag ? '<span class="flag" title="Sum equals 14 - round">⚑</span>' : ''}</td>
+                      ${cols}
+                    </tr>`;
+        }).join('');
+
+        historyContent.innerHTML = `<div class="hint" style="margin-bottom:8px;">Scoring per player: committed × 10 if committed > 0; if committed is 0 then +10 (if not failed) or -10 (if failed). A red flag appears when round committed total equals (14 - round).</div>
+                    <table class="history-table">
+                      <thead>${header}</thead>
+                      <tbody>${body}</tbody>
+                    </table>`;
+    }
+
+    function ensureNamesOnFirstLoad() {
+        // If any player name is empty and no rounds played yet, force entering names
+        const hasEmpty = !state.players || state.players.length !== 4 || state.players.some(n => !n || String(n).trim() === '');
+        if (hasEmpty && state.round === 0 && state.history.length === 0) {
+            openNamesDialog(state.players || ['', '', '', '']);
+        }
+    }
+
+    // Event bindings
+    btnStartRound.addEventListener('click', () => startRound());
+    btnCancelRound.addEventListener('click', () => cancelRound());
+    btnEndRound.addEventListener('click', () => endRound());
+
+    if (btnEditLastRound) {
+        btnEditLastRound.addEventListener('click', () => {
+            if (!state.history.length) return;
+            const last = state.history[state.history.length - 1];
+            openRound('edit', last.entries, last.round);
+        });
+    }
+
+    btnViewHistory.addEventListener('click', () => { renderHistory(); historyDialog.showModal(); });
+    btnCloseHistory.addEventListener('click', () => historyDialog.close());
+
+    // Winner overlay interactions
+    function showWinnerOverlay(winners) {
+        const nameStr = Array.isArray(winners) ? winners.join(', ') : String(winners);
+        winNameEl.textContent = nameStr || 'Winner';
+        winOverlay.classList.add('show');
+        startFireworks();
+    }
+    function hideWinnerOverlay() {
+        winOverlay.classList.remove('show');
+        stopFireworks();
+    }
+
+    btnCloseWin.addEventListener('click', hideWinnerOverlay);
+    btnReset2.addEventListener('click', () => {
+        hideWinnerOverlay();
+        btnReset.click();
+    });
+
+    // Fireworks animation (simple particle system)
+    let fwAnimId = null;
+    const particles = [];
+    function resizeCanvas() {
+        const dpr = window.devicePixelRatio || 1;
+        fwCanvas.width = Math.floor(fwCanvas.clientWidth * dpr);
+        fwCanvas.height = Math.floor(fwCanvas.clientHeight * dpr);
+        const ctx = fwCanvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    function spawnFirework() {
+        const w = fwCanvas.clientWidth || window.innerWidth;
+        const h = fwCanvas.clientHeight || window.innerHeight;
+        const cx = Math.random() * w * 0.9 + w * 0.05;
+        const cy = Math.random() * h * 0.5 + h * 0.1;
+        const colors = ['#ff6b6b', '#ffd93d', '#6bcB77', '#4d96ff', '#e879f9', '#22c55e'];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const count = 50 + Math.floor(Math.random() * 50);
+        for (let i = 0; i < count; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 1 + Math.random() * 3;
+            particles.push({
+                x: cx, y: cy,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                life: 60 + Math.random() * 40,
+                color,
+                size: 2 + Math.random() * 2,
+            });
+        }
+    }
+    function stepFireworks() {
+        const ctx = fwCanvas.getContext('2d');
+        const w = fwCanvas.clientWidth || window.innerWidth;
+        const h = fwCanvas.clientHeight || window.innerHeight;
+        ctx.clearRect(0, 0, w, h);
+        // occasionally spawn
+        if (Math.random() < 0.08) spawnFirework();
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.vy += 0.02; // gravity
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life -= 1;
+            ctx.globalAlpha = Math.max(0, p.life / 100);
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+            if (p.life <= 0) particles.splice(i, 1);
+        }
+        ctx.globalAlpha = 1;
+        fwAnimId = requestAnimationFrame(stepFireworks);
+    }
+    function startFireworks() {
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        if (fwAnimId) cancelAnimationFrame(fwAnimId);
+        fwAnimId = requestAnimationFrame(stepFireworks);
+    }
+    function stopFireworks() {
+        window.removeEventListener('resize', resizeCanvas);
+        if (fwAnimId) cancelAnimationFrame(fwAnimId);
+        fwAnimId = null;
+        particles.length = 0;
+        const ctx = fwCanvas.getContext('2d');
+        const w = fwCanvas.clientWidth || window.innerWidth;
+        const h = fwCanvas.clientHeight || window.innerHeight;
+        ctx.clearRect(0, 0, w, h);
+    }
+
+    btnReset.addEventListener('click', () => {
+        if (confirm('Reset the current game? This will clear history and totals.')) {
+            hideWinnerOverlay();
+            state = newGame(state.players);
+            saveState(state);
+            renderLeaderboard();
+            ensureNamesOnFirstLoad();
+        }
+    });
+
+    btnEditNames.addEventListener('click', () => openNamesDialog(state.players));
+
+    btnSaveNames.addEventListener('click', () => {
+        const names = [];
+        for (let i = 0; i < 4; i++) {
+            const val = document.getElementById('name' + i).value.trim();
+            if (!val) { alert('Please enter a name for player ' + (i + 1)); return; }
+            names.push(val);
+        }
+        // If the game has already started, only update names (keep scores/history)
+        state.players = names;
+        saveState(state);
+        renderLeaderboard();
+        closeNamesDialog();
+    });
+
+    btnCancelNames.addEventListener('click', () => {
+        // If no proper names were ever saved and no progress, cancel should still allow continuing with defaults
+        closeNamesDialog();
+    });
+
+    // Initial render
+    renderLeaderboard();
+    ensureNamesOnFirstLoad();
+</script>
+</body>
+
+</html>
