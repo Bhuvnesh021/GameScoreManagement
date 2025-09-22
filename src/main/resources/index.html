@@ -415,6 +415,7 @@
             </div>
             <div class="controls" style="margin-top: 12px;">
                 <button id="btnEndRound">End Round</button>
+                <button class="danger" id="btnLockRound">Lock</button>
                 <button class="secondary" id="btnCancelRound">Cancel</button>
             </div>
         </div>
@@ -551,6 +552,7 @@
     const roundPanel = document.getElementById('roundPanel');
     const roundForm = document.getElementById('roundForm');
     const btnEndRound = document.getElementById('btnEndRound');
+    const btnLockRound = document.getElementById('btnLockRound');
     const btnCancelRound = document.getElementById('btnCancelRound');
 
     const namesDialog = document.getElementById('namesDialog');
@@ -585,15 +587,15 @@
                 (score === minScore) ? 'loser' : ''
             ].filter(Boolean).join(' ');
             return `<tr class="${trCls}">
-                      <td class="player-name">${escapeHtml(name)}</td>
-                      <td class="${scoreCls}">${score}</td>
-                    </tr>`;
+                  <td class="player-name">${escapeHtml(name)}</td>
+                  <td class="${scoreCls}">${score}</td>
+                </tr>`;
         }).join('');
 
         leaderboardDiv.innerHTML = `<table>
-                    <thead><tr><th>Player</th><th>Total</th></tr></thead>
-                    <tbody>${rows}</tbody>
-                  </table>`;
+                <thead><tr><th>Player</th><th>Total</th></tr></thead>
+                <tbody>${rows}</tbody>
+              </table>`;
 
         const formOpen = roundPanel.style.display !== 'none';
         btnStartRound.disabled = formOpen || state.round >= MAX_ROUNDS;
@@ -630,10 +632,10 @@
             const committedVal = presetEntries ? (presetEntries[i]?.committed ?? '') : '';
             const negChecked = presetEntries ? !!(presetEntries[i]?.negative) : false;
             rows.push(`
-                      <div class="player-name">${escapeHtml(name)}</div>
-                      <div><input type="number" id="commit_${i}" min="0" step="1" placeholder="0" value="${committedVal}" /></div>
-                      <div class="checkbox"><input type="checkbox" id="neg_${i}" ${negChecked ? 'checked' : ''}/> <label for="neg_${i}">Apply negative</label></div>
-                    `);
+                  <div class="player-name">${escapeHtml(name)}</div>
+                  <div><input type="number" id="commit_${i}" min="0" step="1" placeholder="0" value="${committedVal}" /></div>
+                  <div class="checkbox"><input type="checkbox" id="neg_${i}" ${negChecked ? 'checked' : ''}/> <label for="neg_${i}">Apply negative</label></div>
+                `);
         });
         roundForm.innerHTML = rows.join('');
 
@@ -683,7 +685,15 @@
             warnEl.style.display = 'none';
         }
     }
-
+    function handleLock() {
+        if (confirm('Locking the round will prevent further edits. Are you sure?')) {
+            for (let i = 0; i < 4; i++) {
+                const inp = document.getElementById('commit_' + i);
+                if (inp) inp.disabled = true;
+            }
+            if (btnLockRound) btnLockRound.disabled = true; l̥l̥
+        }
+    }
     function endRound() {
         // If adding a new round, ensure we still have capacity
         if (!editMode && state.round >= MAX_ROUNDS) {
@@ -790,32 +800,32 @@
         } else {
             const leaderboard = buildLeaderboard(games);
             allGamesContent.innerHTML = `
-              <h3>Leaderboard</h3>
-              <table class="leaderboard" border="1" cellpadding="5" style="border-collapse: collapse;">
-                <thead>
-                  <tr>
-    <th>Player</th>
-    <th>Wins</th>
-    <th>Games Played</th>
-    <th>Highest</th>
-    <th>Lowest</th>
-    <th>Total Score</th>
-  </tr>
-                </thead>
-                <tbody>
-  ${leaderboard.map(entry => `
-    <tr>
-      <td class="player-name">${entry.playerName}</td>
-      <td class="score-pos">${entry.totalWins}</td>
-      <td>${entry.noOfGamesPlayed}</td>
-      <td>${entry.highestScore}</td>
-      <td>${entry.lowestScore}</td>
-      <td>${entry.totalScore}</td>
-    </tr>
-  `).join('')}
+          <h3>Leaderboard</h3>
+          <table class="leaderboard" border="1" cellpadding="5" style="border-collapse: collapse;">
+            <thead>
+              <tr>
+<th>Player</th>
+<th>Wins</th>
+<th>Games Played</th>
+<th>Highest</th>
+<th>Lowest</th>
+<th>Total Score</th>
+</tr>
+            </thead>
+            <tbody>
+${leaderboard.map(entry => `
+<tr>
+  <td class="player-name">${entry.playerName}</td>
+  <td class="score-pos">${entry.totalWins}</td>
+  <td>${entry.noOfGamesPlayed}</td>
+  <td>${entry.highestScore}</td>
+  <td>${entry.lowestScore}</td>
+  <td>${entry.totalScore}</td>
+</tr>
+`).join('')}
 </tbody>
-              </table>
-            `;
+          </table>
+        `;
         }
 
         allGamesDialog.showModal();
@@ -834,28 +844,28 @@
             return;
         }
         const header = `<tr>
-                    <th>Round</th>
-                    ${state.players.map(p => `<th>${escapeHtml(p)}</th>`).join('')}
-                  </tr>`;
+                <th>Round</th>
+                ${state.players.map(p => `<th>${escapeHtml(p)}</th>`).join('')}
+              </tr>`;
         const body = state.history.map(h => {
             const cols = h.entries.map((e, i) => {
                 const pillClass = e.negative ? 'neg' : 'pos';
                 return `<td>
-                        <div>Committed: ${e.committed}</div>
-                        <div class="pill ${pillClass}">${e.delta >= 0 ? '+' : ''}${e.delta}</div>
-                      </td>`;
+                    <div>Committed: ${e.committed}</div>
+                    <div class="pill ${pillClass}">${e.delta >= 0 ? '+' : ''}${e.delta}</div>
+                  </td>`;
             }).join('');
             return `<tr>
-                      <td>#${h.round} ${h.redFlag ? '<span class="flag" title="Sum equals 14 - round">⚑</span>' : ''}</td>
-                      ${cols}
-                    </tr>`;
+                  <td>#${h.round} ${h.redFlag ? '<span class="flag" title="Sum equals 14 - round">⚑</span>' : ''}</td>
+                  ${cols}
+                </tr>`;
         }).join('');
 
         historyContent.innerHTML = `<div class="hint" style="margin-bottom:8px;">Scoring per player: committed × 10 if committed > 0; if committed is 0 then +10 (if not failed) or -10 (if failed). A red flag appears when round committed total equals (14 - round).</div>
-                    <table class="history-table">
-                      <thead>${header}</thead>
-                      <tbody>${body}</tbody>
-                    </table>`;
+                <table class="history-table">
+                  <thead>${header}</thead>
+                  <tbody>${body}</tbody>
+                </table>`;
     }
 
     function ensureNamesOnFirstLoad() {
@@ -870,6 +880,7 @@
     btnStartRound.addEventListener('click', () => startRound());
     btnCancelRound.addEventListener('click', () => cancelRound());
     btnEndRound.addEventListener('click', () => endRound());
+    btnLockRound.addEventListener('click', () => handleLock());
 
     if (btnEditLastRound) {
         btnEditLastRound.addEventListener('click', () => {
